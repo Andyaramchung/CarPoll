@@ -1,0 +1,94 @@
+class Person {
+    constructor(name, age, password, phoneNumber) {
+        this.name = name;
+        this.age = age;
+        this.friends = [];
+        this.address = '';
+        this.personalTraits = [];
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+    }
+
+    getName() {
+        return this.name;
+    }
+
+    getAge() {
+        return this.age;
+    }
+
+    changeName(newName) {
+        this.name = newName;
+    }
+
+    changeAge(newAge) {
+        this.age = newAge;
+    }
+
+    addPersonality(trait) {
+        this.personalTraits.push(trait);
+    }
+
+    removePersonality() {
+        console.log("Personality:");
+        this.personalTraits.forEach((trait, index) => {
+            console.log(`${index + 1}. ${trait}`);
+        });
+        const indexToRemove = parseInt(prompt("Which personality trait do you want to remove?")) - 1;
+        this.personalTraits.splice(indexToRemove, 1);
+    }
+
+    getPersonalityTraits() {
+        console.log("Personality:");
+        this.personalTraits.forEach((trait, index) => {
+            console.log(`${index + 1}. ${trait}`);
+        });
+    }
+
+    addFriend(person) {
+        this.friends.push(person);
+    }
+
+    removeFriend(person) {
+        const indexToRemove = this.friends.indexOf(person);
+        if (indexToRemove !== -1) {
+            this.friends.splice(indexToRemove, 1);
+        }
+    }
+
+    getFriends() {
+        console.log(`${this.name} has ${this.friends.length} friends.`);
+        console.log("Friends:");
+        this.friends.forEach(friend => {
+            console.log(friend.getName());
+        });
+    }
+
+    setAddress(address) {
+        this.address = address;
+    }
+
+    getAddress() {
+        return this.address;
+    }
+
+    getPassword() {
+        return this.password;
+    }
+
+    getPhoneNumber() {
+        return this.phoneNumber;
+    }
+
+    changePassword(newPassword) {
+        this.password = newPassword;
+    }
+
+    changePhoneNumber(newPhoneNumber) {
+        this.phoneNumber = newPhoneNumber;
+    }
+
+    toString() {
+        return `User ${this.name} is ${this.age} years old.`;
+    }
+}
