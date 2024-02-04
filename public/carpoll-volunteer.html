@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Match Page</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAnDa-MRQ9oAYTmCTigfoD_qF4oI43-RgI&callback=initPage" async defer></script>
+        <style>
+            body {
+                background-color: #f8f9fa;
+            }
+            .container {
+                background-color: #fff;
+                border-radius: 10px;
+                padding: 20px;
+                margin-top: 20px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+            h2 {
+                color: #007bff;
+            }
+            .form-group label {
+                font-weight: bold;
+            }
+            .btn-primary {
+                background-color: #007bff;
+                border: none;
+            }
+            .btn-primary:hover {
+                background-color: #0056b3;
+            }
+            #map {
+                height: 400px;
+                width: 100%;
+            }
+        </style>
+    </head>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="/">CarPoll</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/logout">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+
+<body>
+
+<div class="container">
+    <h2>Thank you for volunteering! </h2>
+    <p>You are responsible for the following polling locations: </p>
+    <div id="map"></div>
+
+
+
+    <input type="hidden" id="phoneInput" name="phone">
+
+
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    let phone;
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const phone = urlParams.get('phone');
+
+        fetch('/getLatLng?phone=' + encodeURIComponent(phone))
+            .then(response => response.json())
+            .then(data => {
+                initMap(data.lat, data.lng, data.nearestPollingLocation);
+            })
+            .catch(error => console.error('Error:', error));
+
+
+        document.getElementById('phoneInput').value = phone; // Set the phone number in the hidden input
+
+        
+    });
+    
+
+    function initMap() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const phone = urlParams.get('phone');
+    
+        fetch('/getLatLng?phone=' + encodeURIComponent(phone))
+            .then(response => response.json())
+            .then(data => {
+                const userLocation = { lat: data.lat, lng: data.lng };
+    
+                if (data.nearestPollingLocation) {
+                    const pollingLocation = {
+                        lat: data.nearestPollingLocation.latitude,
+                        lng: data.nearestPollingLocation.longitude,
+                    };
+    
+                    // Create a map centered at the user's location
+                    const map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 13,
+                        center: userLocation,
+                    });
+    
+                    // Create a marker for the nearest polling location
+                    const nearestPollingMarker = new google.maps.Marker({
+                        position: pollingLocation,
+                        map: map,
+                        title: 'Nearest Polling Location',
+                    });
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+    
+
+    
+  
+
+    function calculateRouteAndTime(userLocation, pollingLocation) {
+        const directionsService = new google.maps.DirectionsService();
+        const directionsRenderer = new google.maps.DirectionsRenderer();
+    
+        const map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 13,
+            center: userLocation,
+        });
+    
+        directionsRenderer.setMap(map);
+    
+        const request = {
+            origin: userLocation,
+            destination: pollingLocation,
+            travelMode: 'DRIVING',
+        };
+    
+        directionsService.route(request, function (result, status) {
+            if (status === 'OK') {
+                directionsRenderer.setDirections(result);
+    
+                const route = result.routes[0];
+                const distance = route.legs[0].distance.text;
+                const duration = route.legs[0].duration.text;
+    
+                const infoWindowContent = `<p>Your Location</p>
+                                            <p>Polling Location</p>
+                                            <p>Distance: ${distance}</p>
+                                            <p>Estimated Driving Time: ${duration}</p>`;
+    
+                const infoWindow = new google.maps.InfoWindow({
+                    content: infoWindowContent,
+                });
+    
+                
+            } else {
+                alert('Error: Unable to calculate the route and driving time.');
+            }
+        });
+    }
+    
+
+
+</script>
+
+</body>
+</html>
