@@ -1,0 +1,82 @@
+[
+  {
+    "name": "John",
+    "age": "60",
+    "phone": "1111111111",
+    "address": "1103 Hunting Crk Dr, Perrysburg, OH 43551",
+    "password": "111",
+    "latitude": 41.5275874,
+    "longitude": -83.68399699999999,
+    "nearestPollingLocation": {
+      "address": "Perrysburg High School, 13385 Roachton Rd",
+      "latitude": 41.5186445,
+      "longitude": -83.6566755
+    },
+    "voteDate": "2024-02-24",
+    "voteTime": "6:00"
+  },
+  {
+    "name": "Karen",
+    "age": "58",
+    "phone": "1234567890",
+    "address": "3242 Chapel Creek Drive, Perrysburg, OH 43551",
+    "password": "123",
+    "latitude": 41.5320945,
+    "longitude": -83.67826509999999,
+    "nearestPollingLocation": {
+      "address": "Perrysburg High School, 13385 Roachton Rd",
+      "latitude": 41.5186445,
+      "longitude": -83.6566755
+    },
+    "voteDate": "2024-02-24",
+    "voteTime": "6:00"
+  },
+  {
+    "name": "Tim",
+    "age": "65",
+    "phone": "0214597284",
+    "address": "3712 Turtle Creek Dr, Perrysburg, OH 43551",
+    "password": "123",
+    "latitude": 41.526804,
+    "longitude": -83.68956229999999,
+    "nearestPollingLocation": {
+      "address": "Perrysburg High School, 13385 Roachton Rd",
+      "latitude": 41.5186445,
+      "longitude": -83.6566755
+    },
+    "voteDate": "2024-02-24",
+    "voteTime": "6:00"
+  },
+  {
+    "name": "Judy",
+    "age": "70",
+    "phone": "7832673948",
+    "address": "140 E Indiana Ave, Perrysburg, OH 43551",
+    "password": "123",
+    "latitude": 41.5571479,
+    "longitude": -83.6262224,
+    "nearestPollingLocation": {
+      "address": "Toth Elementary School, 200 E 7th St",
+      "latitude": 41.5540812,
+      "longitude": -83.6244226
+    },
+    "voteDate": "2024-02-24",
+    "voteTime": "6:00"
+  },
+  {
+    "name": "Anny",
+    "age": "57",
+    "phone": "8784267821",
+    "address": "2000 Chapel Creek Drive, Perrysburg, OH 43551",
+    "password": "123",
+    "latitude": 41.5325612,
+    "longitude": -83.67507739999999,
+    "nearestPollingLocation": {
+      "address": "Perrysburg High School, 13385 Roachton Rd",
+      "latitude": 41.5186445,
+      "longitude": -83.6566755
+    },
+    "voteDate": "2024-02-24",
+    "voteTime": "6:00"
+  }
+]

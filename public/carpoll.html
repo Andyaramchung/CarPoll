@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">CarPoll</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/logout">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+
+<body>
+
+<div class="container">
+    <h2>Choose a voting date! </h2>
+    <div id="map"></div>
+
+
+
+    <form id="voteForm" action="/saveVoteDetails" method="POST">
+        <div class="form-group">
+            <label for="voteDate">Date:</label>
+            <input type="date" id="voteDate" name="voteDate" class="form-control" min="2024-02-04" required>
+        </div>
+        <div class="form-group">
+            <label for="voteTime">Time (6 AM - 9 PM):</label>
+            <select id="voteTime" name="voteTime" class="form-control" required>
+                <!-- Time options will be populated by JavaScript -->
+            </select>
+        </div>
+
+        <input type="hidden" id="phoneInput" name="phone">
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    let phone;
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const phone = urlParams.get('phone');
+
+        fetch('/getLatLng?phone=' + encodeURIComponent(phone))
+            .then(response => response.json())
+            .then(data => {
+                initMap(data.lat, data.lng, data.nearestPollingLocation);
+            })
+            .catch(error => console.error('Error:', error));
+
+
+
+        populateTimeOptions(); 
+
+        document.getElementById('phoneInput').value = phone; // Set the phone number in the hidden input
+
+        
+    });
+    
+
+    function initMap(userLat, userLng, nearestPollingLocation) {
+        var map = L.map('map').setView([userLat, userLng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add a marker for the user's location
+        var userMarker = L.marker([userLat, userLng]).addTo(map);
+        userMarker.bindPopup("Your Location").openPopup();
+
+        // Check if nearestPollingLocation is provided and add a marker for it
+        if (nearestPollingLocation) {
+            console.log("nearestPollingLocation",nearestPollingLocation);
+            var pollingMarker = L.marker([nearestPollingLocation.latitude, nearestPollingLocation.longitude]).addTo(map);
+            pollingMarker.bindPopup("Polling Location").openPopup();
+        }
+        else{
+            console.log("nooo");
+        }
+    }
+
+    function populateTimeOptions() {
+        const timeSelect = document.getElementById('voteTime');
+        for (let hour = 6; hour <= 21; hour++) { // 21 to include 9 PM as the last option
+            const option = document.createElement('option');
+            const displayHour = hour > 12 ? hour - 12 : hour;
+            const amPm = hour >= 12 ? 'PM' : 'AM';
+            option.value = `${hour}:00`;
+            option.textContent = `${displayHour}:00 ${amPm}`;
+            timeSelect.appendChild(option);
+        }
+    }
+
+
+</script>
+
+</body>
+</html>

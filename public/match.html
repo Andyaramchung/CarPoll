@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Page</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">CarPoll</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/logout">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+
+<body>
+
+<div class="container">
+    <h2>Matching Results</h2>
+    <div id="matchInfo"></div>
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const date = urlParams.get('date');
+    const time = urlParams.get('time');
+    const pollingLocationStr = urlParams.get('location');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch(`/getMatches?date=${date}&time=${time}&location=${encodeURIComponent(pollingLocationStr)}`)
+            .then(response => response.json())
+            .then(data => {
+                displayMatches(data.matches, data.pollingLocation);
+                initMap(data.matches, data.pollingLocation);
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    function displayMatches(matches, pollingLocation) {
+        const matchInfoDiv = document.getElementById('matchInfo');
+        
+        // Adding the line with polling location, date, and time
+        matchInfoDiv.innerHTML = `<p>You are going to <strong>${pollingLocation.address}</strong> on <strong>${date}</strong> at <strong>${time}</strong>.</p>`;
+    
+        if (matches.length < 4) {
+            matchInfoDiv.innerHTML += `<p>Carpooling partners:</p>`;
+        } else {
+            matchInfoDiv.innerHTML += `<p>Matching successfully with ${matches.length} people:</p>`;
+        }
+    
+        matches.forEach(match => {
+            matchInfoDiv.innerHTML += `<p>${match.name} - ${match.address}</p>`;
+        });
+    }
+    
+
+    function initMap(matches, pollingLocation) {
+        const map = L.map('map').setView([pollingLocation.latitude, pollingLocation.longitude], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add a marker for the polling location
+        L.marker([pollingLocation.latitude, pollingLocation.longitude]).addTo(map)
+            .bindPopup("Polling Location: " + pollingLocation.address).openPopup();
+
+        // Add markers for each matching user
+        matches.forEach(match => {
+            L.marker([match.latitude, match.longitude]).addTo(map)
+                .bindPopup(`${match.name}`).openPopup();
+        });
+    }
+</script>
+
+</body>
+</html>
