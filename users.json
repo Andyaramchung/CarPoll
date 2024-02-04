@@ -75,8 +75,21 @@
       "address": "Perrysburg High School, 13385 Roachton Rd",
       "latitude": 41.5186445,
       "longitude": -83.6566755
-    },
-    "voteDate": "2024-02-24",
-    "voteTime": "6:00"
+    }
+  },
+  {
+    "name": "Tom",
+    "age": "20",
+    "phone": "2222222222",
+    "address": "1000 Chapel Creek Drive, Perrysburg, OH 43551",
+    "password": "111",
+    "volunteer": "on",
+    "latitude": 41.5324223,
+    "longitude": -83.6791745,
+    "nearestPollingLocation": {
+      "address": "Perrysburg High School, 13385 Roachton Rd",
+      "latitude": 41.5186445,
+      "longitude": -83.6566755
+    }
   }
 ]

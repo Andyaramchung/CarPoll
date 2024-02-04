@@ -56,27 +56,14 @@
 <body>
 
 <div class="container">
-    <h2>Voting date? </h2>
+    <h2>Thank you for volunteering! </h2>
+    <p>You are responsible for the following polling locations: </p>
     <div id="map"></div>
 
 
 
-    <form id="voteForm" action="/saveVoteDetails" method="POST">
-        <div class="form-group">
-            <label for="voteDate">Date:</label>
-            <input type="date" id="voteDate" name="voteDate" class="form-control" min="2024-02-04" required>
-        </div>
-        <div class="form-group">
-            <label for="voteTime">Time (6 AM - 9 PM):</label>
-            <select id="voteTime" name="voteTime" class="form-control" required>
-                <!-- Time options will be populated by JavaScript -->
-            </select>
-        </div>
+    <input type="hidden" id="phoneInput" name="phone">
 
-        <input type="hidden" id="phoneInput" name="phone">
-
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
 
 
 </div>
@@ -96,9 +83,6 @@
             .catch(error => console.error('Error:', error));
 
 
-
-        populateTimeOptions(); 
-
         document.getElementById('phoneInput').value = phone; // Set the phone number in the hidden input
 
         
@@ -106,41 +90,40 @@
     
 
     function initMap() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const phone = urlParams.get('phone');
-
-    fetch('/getLatLng?phone=' + encodeURIComponent(phone))
-        .then(response => response.json())
-        .then(data => {
-            const userLocation = { lat: data.lat, lng: data.lng };
-
-            if (data.nearestPollingLocation) {
-                const pollingLocation = {
-                    lat: data.nearestPollingLocation.latitude,
-                    lng: data.nearestPollingLocation.longitude,
-                };
-
-                calculateRouteAndTime(userLocation, pollingLocation);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-}
-
+        const urlParams = new URLSearchParams(window.location.search);
+        const phone = urlParams.get('phone');
     
+        fetch('/getLatLng?phone=' + encodeURIComponent(phone))
+            .then(response => response.json())
+            .then(data => {
+                const userLocation = { lat: data.lat, lng: data.lng };
     
-
-    function populateTimeOptions() {
-        const timeSelect = document.getElementById('voteTime');
-        for (let hour = 6; hour <= 21; hour++) { // 21 to include 9 PM as the last option
-            const option = document.createElement('option');
-            const displayHour = hour > 12 ? hour - 12 : hour;
-            const amPm = hour >= 12 ? 'PM' : 'AM';
-            option.value = `${hour}:00`;
-            option.textContent = `${displayHour}:00 ${amPm}`;
-            timeSelect.appendChild(option);
-        }
+                if (data.nearestPollingLocation) {
+                    const pollingLocation = {
+                        lat: data.nearestPollingLocation.latitude,
+                        lng: data.nearestPollingLocation.longitude,
+                    };
+    
+                    // Create a map centered at the user's location
+                    const map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 13,
+                        center: userLocation,
+                    });
+    
+                    // Create a marker for the nearest polling location
+                    const nearestPollingMarker = new google.maps.Marker({
+                        position: pollingLocation,
+                        map: map,
+                        title: 'Nearest Polling Location',
+                    });
+                }
+            })
+            .catch(error => console.error('Error:', error));
     }
+    
 
+    
+  
 
     function calculateRouteAndTime(userLocation, pollingLocation) {
         const directionsService = new google.maps.DirectionsService();

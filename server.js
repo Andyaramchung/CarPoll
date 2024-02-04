@@ -27,7 +27,7 @@ app.post('/signup', async (req, res) => {
     console.log('Received request body:');
     console.log(JSON.stringify(req.body, null, 2));
 
-    const { name, age, phone, address, password } = req.body;
+    const { name, age, phone, address, password, volunteer } = req.body;
 
     const usersFile = path.join(__dirname, 'users.json');
 
@@ -62,13 +62,14 @@ app.post('/signup', async (req, res) => {
                 phone,
                 address,
                 password,
+                volunteer,
                 latitude: lat,
                 longitude: lng,
                 nearestPollingLocation: {
                     address: nearestLocation.address,
                     latitude: nearestLocation.latitude,
                     longitude: nearestLocation.longitude
-                }
+                },
             };
 
             // Read the current users
@@ -78,7 +79,11 @@ app.post('/signup', async (req, res) => {
                     const users = [user];
                     fs.writeFile(usersFile, JSON.stringify(users, null, 2), (err) => {
                         if (err) throw err;
-                        res.redirect('/carpoll?phone=' + encodeURIComponent(req.body.phone));
+                        if (volunteer) {
+                            res.redirect('/carpoll-volunteer?phone=' + encodeURIComponent(req.body.phone));
+                        } else {
+                            res.redirect('/carpoll?phone=' + encodeURIComponent(req.body.phone));
+                        }
                     });
                 } else if (err) {
                     console.error(err);
@@ -92,7 +97,11 @@ app.post('/signup', async (req, res) => {
                         users.push(user);
                         fs.writeFile(usersFile, JSON.stringify(users, null, 2), (err) => {
                             if (err) throw err;
-                            res.redirect('/carpoll?phone=' + encodeURIComponent(req.body.phone));
+                            if (volunteer) {
+                                res.redirect('/carpoll-volunteer?phone=' + encodeURIComponent(req.body.phone));
+                            } else {
+                                res.redirect('/carpoll?phone=' + encodeURIComponent(req.body.phone));
+                            }
                         });
                     }
                 }
@@ -115,7 +124,11 @@ app.post('/login', (req, res) => {
         const users = JSON.parse(data);
         const user = users.find(u => u.phone === phone && u.password === password);
         if (user) {
-            res.redirect('/carpoll?phone=' + encodeURIComponent(req.body.phone));
+            if (user.volunteer) {
+                res.redirect('/carpoll-volunteer?phone=' + encodeURIComponent(req.body.phone));
+            } else {
+                res.redirect('/carpoll?phone=' + encodeURIComponent(req.body.phone));
+            }
         } else {
             res.status(401).send('Invalid credentials');
         }
@@ -126,6 +139,11 @@ app.post('/login', (req, res) => {
 app.get('/carpoll', (req, res) => {
     // Serve the carpool page
     res.sendFile(path.join(__dirname, 'public', 'carpoll.html'));
+});
+
+app.get('/carpoll-volunteer', (req, res) => {
+    // Serve the carpool page
+    res.sendFile(path.join(__dirname, 'public', 'carpoll-volunteer.html'));
 });
 
 app.get('/getLatLng', function(req, res) {
@@ -269,6 +287,19 @@ app.get('/logout', (req, res) => {
 
     // Redirect to the index page after logout
     res.redirect('/index.html');
+});
+
+app.get('/getPollingLocations', (req, res) => {
+    // Read the polling locations data from the locations.json file
+    fs.readFile('locations.json', (err, data) => {
+        if (err) {
+            console.error('Error reading locations.json:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const pollingLocations = JSON.parse(data);
+        res.json(pollingLocations);
+    });
 });
 
 
