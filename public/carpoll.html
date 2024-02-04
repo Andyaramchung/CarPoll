@@ -35,6 +35,10 @@
                 height: 400px;
                 width: 100%;
             }
+            #scrollable-div {
+                max-height: 200px; /* Adjust the height as needed */
+                overflow-y: auto;
+            }
         </style>
     </head>
 
@@ -56,11 +60,30 @@
 <body>
 
 <div class="container">
-    <h2>Voting date? </h2>
+    <h2>Polling Location</h2>
     <div id="map"></div>
 
 
+<h2>Candidate List</h2>
+<div id="scrollable-div">
+<table id="candidates-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Party</th>
+            <th>Website</th>
+            <th>Social Media</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Candidate information will be generated here using JavaScript -->
+    </tbody>
+</table>
+</div>
 
+
+
+<h2>Voting Date? </h2>
     <form id="voteForm" action="/saveVoteDetails" method="POST">
         <div class="form-group">
             <label for="voteDate">Date:</label>
@@ -103,6 +126,82 @@
 
         
     });
+
+
+    var xhr = new XMLHttpRequest();
+    var apiUrl = "https://www.googleapis.com/civicinfo/v2/voterinfo?key=AIzaSyAnDa-MRQ9oAYTmCTigfoD_qF4oI43-RgI&address=3242%20Chapel%20Creek%20Drive%20Perrysburg&electionId=2000";
+
+    xhr.open("GET", apiUrl, true);
+
+    xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+
+        var apiResponse = JSON.parse(xhr.responseText);
+
+        generateCandidateList(apiResponse);
+    }
+    };
+
+    xhr.send();
+
+    function generateCandidateList(apiResponse) {
+        var candidatesData = apiResponse.contests;
+      
+        // Access and process candidate data here
+        // Create an HTML table with candidate information
+      
+        var candidatesTable = document.getElementById("candidates-table");
+        var tableBody = candidatesTable.getElementsByTagName("tbody")[0];
+      
+        for (var i = 0; i < candidatesData.length; i++) {
+          var candidates = candidatesData[i].candidates;
+          
+          for (var j = 0; j < candidates.length; j++) {
+            var candidate = candidates[j];
+            var row = tableBody.insertRow(tableBody.rows.length);
+      
+            // Create cells for candidate information
+            var nameCell = row.insertCell(0);
+            var partyCell = row.insertCell(1);
+            var websiteCell = row.insertCell(2);
+            var socialMediaCell = row.insertCell(3);
+      
+            // Populate the cells with candidate information
+            nameCell.innerHTML = candidate.name;
+            partyCell.innerHTML = candidate.party;
+      
+            // Create links to candidate website and social media profiles if available
+            if (candidate.candidateUrl) {
+              var websiteLink = document.createElement("a");
+              websiteLink.href = candidate.candidateUrl;
+              websiteLink.textContent = "Website";
+              websiteCell.appendChild(websiteLink);
+            } else {
+              websiteCell.innerHTML = "N/A";
+            }
+      
+            if (candidate.channels) {
+              for (var k = 0; k < candidate.channels.length; k++) {
+                var channel = candidate.channels[k];
+                var socialMediaLink = document.createElement("a");
+                socialMediaLink.href = channel.id;
+                socialMediaLink.textContent = channel.type;
+                socialMediaCell.appendChild(socialMediaLink);
+      
+                // Add a space between social media links
+                if (k < candidate.channels.length - 1) {
+                  socialMediaCell.appendChild(document.createTextNode(" "));
+                }
+              }
+            } else {
+              socialMediaCell.innerHTML = "N/A";
+            }
+          }
+        }
+      }
+      
+      
+
     
 
     function initMap() {
@@ -183,6 +282,7 @@
         });
     }
     
+
 
 
 </script>
